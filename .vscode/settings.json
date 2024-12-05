@@ -1,3 +1,12 @@
 {
-    "C_Cpp.intelliSenseEngine": "disabled"
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "terminal.integrated.profiles.windows": {
+        "mPowerShell": {
+            "source": "PowerShell",
+            "args": ["-NoExit", "-Command ", "[System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8; [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8"],
+        },
+    },
+    "terminal.integrated.defaultProfile.windows": "mPowerShell",
+    "cmake.options.statusBarVisibility": "hidden",
+    "C_Cpp.autoAddFileAssociations": false
 }
