@@ -1,0 +1,6 @@
+Checks: >
+  cppcoreguidelines-*,
+  modernize-*,
+  google-readability-casting,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-type-vararg

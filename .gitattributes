@@ -1,0 +1,8 @@
+*.bat eol=crlf
+*.ps1 eol=crlf
+*.sh eol=lf
+
+*.png -text
+*.jpg -text
+*.ttf -text
+*.otf -text
