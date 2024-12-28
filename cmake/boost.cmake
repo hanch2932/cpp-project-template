@@ -6,6 +6,7 @@ FetchContent_Declare(
   boost
   GIT_REPOSITORY https://github.com/boostorg/boost.git
   GIT_TAG        boost-1.87.0
+  GIT_SHALLOW    TRUE
 )
 
 FetchContent_MakeAvailable(boost)

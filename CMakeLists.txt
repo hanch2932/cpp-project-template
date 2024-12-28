@@ -44,6 +44,7 @@ include(sdl)
 include(glfw)
 # include(boost)
 include(imgui)
+include(cryptopp)
 
 add_subdirectory(src)
 

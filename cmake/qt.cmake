@@ -6,6 +6,7 @@ FetchContent_Declare(
   qt
   GIT_REPOSITORY https://github.com/qt/qtbase.git
   GIT_TAG        v6.8.1
+  GIT_SHALLOW    TRUE
 )
 
 FetchContent_MakeAvailable(qt)
