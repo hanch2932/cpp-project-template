@@ -13,12 +13,20 @@ ROOT_DIR="$SCRIPT_DIR/.."
 declare -A DOMAIN_FILES=(
     ["app"]="
         $ROOT_DIR/src/encoder/gui/app-main.cpp
+        $ROOT_DIR/src/encoder/gui/j-code-prop.cpp
+        $ROOT_DIR/src/encoder/gui/j2-code-prop.cpp
+        $ROOT_DIR/src/encoder/gui/preview-dock.cpp
+        $ROOT_DIR/src/encoder/gui/license-window.cpp
+        $ROOT_DIR/src/encoder/gui/info-window.cpp
     "
     ["login"]="
         $ROOT_DIR/src/encoder/gui/login.cpp
     "
     ["admin"]="
         $ROOT_DIR/src/encoder/gui/admin.cpp
+    "
+    ["settings"]="
+        $ROOT_DIR/src/encoder/gui/settings-window.cpp
     "
 )
 
@@ -48,9 +56,14 @@ for domain in "${!DOMAIN_FILES[@]}"; do
         continue
     fi
 
-    echo "Generating POT file for domain '$domain' from source files: $EXIST_FILES"
+    echo "Generating POT file for domain '$domain' from source files:"
+    for SRC_FILE in $EXIST_FILES; do
+        echo " - $SRC_FILE"
+    done
     xgettext $EXIST_FILES -o $POT_FILE --from-code=UTF-8 --keyword=_ --no-location
 done
+
+echo ""
 
 # Step 2: PO 파일 생성 또는 업데이트
 echo "Step 2: Generating or Updating PO files for each domain..."
@@ -80,6 +93,8 @@ for domain in "${!DOMAIN_FILES[@]}"; do
     done
 done
 
+echo ""
+
 # Step 3: MO 파일 생성
 echo "Step 3: Generating MO files for each domain..."
 for domain in "${!DOMAIN_FILES[@]}"; do
@@ -98,3 +113,5 @@ for domain in "${!DOMAIN_FILES[@]}"; do
 done
 
 echo "Translation process completed successfully."
+
+echo ""

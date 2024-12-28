@@ -268,7 +268,6 @@ Write-Host "VSCode 확장 설치 중..."
 & code --install-extension ms-vscode.cpptools-extension-pack
 & code --install-extension llvm-vs-code-extensions.vscode-clangd
 & code --install-extension ms-python.python
-& code --install-extension josetr.cmake-language-support-vscode
 Write-Host "설치 완료"
 Write-Host ""
 
