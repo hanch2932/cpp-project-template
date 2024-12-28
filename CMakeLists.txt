@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.30.0)
 
 project(cpp-template VERSION 0.1.0 LANGUAGES C CXX)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+set(CMAKE_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/out")
 
 # 컴파일러 식별자 확인
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang") # clang compiler
@@ -36,6 +39,11 @@ message("")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+include(sdl)
+include(glfw)
+# include(boost)
+include(imgui)
 
 add_subdirectory(src)
 
