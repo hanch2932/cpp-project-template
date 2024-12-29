@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.30.0)
 
-project(cpp-template VERSION 0.1.0 LANGUAGES C CXX)
+project(
+  cpp-template
+  VERSION 0.1.0
+  LANGUAGES C CXX
+)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -42,6 +46,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 include(sdl)
 include(glfw)
+
 # include(boost)
 include(imgui)
 include(cryptopp)
