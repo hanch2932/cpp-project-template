@@ -1,12 +1,18 @@
-include(FetchContent)
+function(include_sdl)
+  set(TARGET_NAME sdl)
 
-set(FETCHCONTENT_BASE_DIR "${CMAKE_OUTPUT_DIR}/third-party")
+  include(FetchContent)
 
-FetchContent_Declare(
-  sdl3
-  GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-  GIT_TAG        preview-3.1.6
-  GIT_SHALLOW    TRUE
-)
+  set(FETCHCONTENT_BASE_DIR "${FETCHCONTENT_BASE_DIR}/${TARGET_NAME}")
 
-FetchContent_MakeAvailable(sdl3)
+  FetchContent_Declare(
+    ${TARGET_NAME}
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG release-2.30.10
+    GIT_SHALLOW TRUE
+  )
+
+  FetchContent_MakeAvailable(${TARGET_NAME})
+endfunction(include_sdl)
+
+include_sdl()

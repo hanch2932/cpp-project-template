@@ -1,37 +1,38 @@
-include(FetchContent)
+function(include_cryptopp)
+  set(TARGET_NAME cryptopp)
 
-set(FETCHCONTENT_BASE_DIR "${CMAKE_OUTPUT_DIR}/third-party")
+  include(FetchContent)
 
-FetchContent_Declare(
-  cryptopp
-  GIT_REPOSITORY https://github.com/weidai11/cryptopp.git
-  GIT_TAG        CRYPTOPP_8_9_0
-  GIT_SHALLOW    TRUE
-)
+  set(FETCHCONTENT_BASE_DIR "${FETCHCONTENT_BASE_DIR}/${TARGET_NAME}")
 
-FetchContent_MakeAvailable(cryptopp)
+  FetchContent_Declare(
+    ${TARGET_NAME}
+    GIT_REPOSITORY https://github.com/weidai11/cryptopp.git
+    GIT_TAG CRYPTOPP_8_9_0
+    GIT_SHALLOW TRUE
+  )
 
-set(CRYPTOPP_DIR ${cryptopp_SOURCE_DIR})
+  FetchContent_MakeAvailable(${TARGET_NAME})
 
-set(TARGET_NAME cryptopp)
+  set(CRYPTOPP_DIR ${cryptopp_SOURCE_DIR})
 
-file(GLOB SRC_FILES ${CRYPTOPP_DIR}/*.cpp)
-add_library(
+  file(GLOB SRC_FILES ${CRYPTOPP_DIR}/*.cpp)
+  add_library(
     ${TARGET_NAME}
     STATIC
     ${SRC_FILES}
-)
+  )
 
-target_include_directories(
+  target_include_directories(
     ${TARGET_NAME}
-    PRIVATE
+    PUBLIC
     ${CRYPTOPP_DIR}
-)
+  )
 
-target_compile_options(
+  target_compile_options(
     ${TARGET_NAME}
     PRIVATE
-    -mssse3 
+    -mssse3
     -msse4.1
     -mavx
     -mavx2
@@ -39,4 +40,7 @@ target_compile_options(
     -mpclmul
     -msha
     -maes
-)
+  )
+endfunction(include_cryptopp)
+
+include_cryptopp()

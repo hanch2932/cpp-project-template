@@ -1,12 +1,18 @@
-include(FetchContent)
+function(include_boost)
+  set(TARGET_NAME boost)
 
-set(FETCHCONTENT_BASE_DIR "${CMAKE_OUTPUT_DIR}/third-party")
+  include(FetchContent)
 
-FetchContent_Declare(
-  boost
-  GIT_REPOSITORY https://github.com/boostorg/boost.git
-  GIT_TAG        boost-1.87.0
-  GIT_SHALLOW    TRUE
-)
+  set(FETCHCONTENT_BASE_DIR "${FETCHCONTENT_BASE_DIR}/${TARGET_NAME}")
 
-FetchContent_MakeAvailable(boost)
+  FetchContent_Declare(
+    ${TARGET_NAME}
+    GIT_REPOSITORY https://github.com/boostorg/boost.git
+    GIT_TAG boost-1.87.0
+    GIT_SHALLOW TRUE
+  )
+
+  FetchContent_MakeAvailable(${TARGET_NAME})
+endfunction(include_boost)
+
+include_boost()

@@ -1,5 +1,5 @@
-function(include_glfw)
-  set(TARGET_NAME glfw)
+function(include_fmt)
+  set(TARGET_NAME fmt)
 
   include(FetchContent)
 
@@ -7,12 +7,12 @@ function(include_glfw)
 
   FetchContent_Declare(
     ${TARGET_NAME}
-    GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG 3.4
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 11.1.1
     GIT_SHALLOW TRUE
   )
 
   FetchContent_MakeAvailable(${TARGET_NAME})
-endfunction(include_glfw)
+endfunction(include_fmt)
 
-include_glfw()
+include_fmt()
