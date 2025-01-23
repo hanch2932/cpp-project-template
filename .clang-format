@@ -8,6 +8,7 @@
 # AccessModifierOffset (Integer)
 AccessModifierOffset: -4
 # AlignAfterOpenBracket (BracketAlignmentStyle)
+AlignAfterOpenBracket: BlockIndent
 # AlignArrayOfStructures (ArrayInitializerAlignmentStyle)
 AlignArrayOfStructures: Right
 # AlignConsecutiveAssignments (AlignConsecutiveStyle)
@@ -29,8 +30,9 @@ AllowShortBlocksOnASingleLine: Always
 # AllowShortCaseLabelsOnASingleLine (Boolean)
 # AllowShortEnumsOnASingleLine (Boolean)
 # AllowShortFunctionsOnASingleLine (ShortFunctionStyle)
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Inline
 # AllowShortIfStatementsOnASingleLine (ShortIfStyle)
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 # AllowShortLambdasOnASingleLine (ShortLambdaStyle)
 # AllowShortLoopsOnASingleLine (Boolean)
 # AlwaysBreakAfterDefinitionReturnType (DefinitionReturnTypeBreakingStyle)

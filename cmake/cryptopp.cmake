@@ -14,7 +14,7 @@ function(include_cryptopp)
 
   FetchContent_MakeAvailable(${TARGET_NAME})
 
-  set(CRYPTOPP_DIR ${cryptopp_SOURCE_DIR})
+  set(CRYPTOPP_DIR ${${TARGET_NAME}_SOURCE_DIR})
 
   file(GLOB SRC_FILES ${CRYPTOPP_DIR}/*.cpp)
   add_library(

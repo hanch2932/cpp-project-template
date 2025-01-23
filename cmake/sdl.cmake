@@ -8,7 +8,7 @@ function(include_sdl)
   FetchContent_Declare(
     ${TARGET_NAME}
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG release-2.30.10
+    GIT_TAG release-3.2.0
     GIT_SHALLOW TRUE
   )
 
