@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <memory>
 #include <print>
 #include <stdexcept>
@@ -115,6 +114,8 @@ public:
             front->prev.reset();
         }
 
+        size--;
+
         return popedVal;
     }
 
@@ -136,6 +137,34 @@ public:
         size--;
 
         return popedVal;
+    }
+
+    auto popFrom(const std::size_t &idx) -> T
+    {
+        if (isEmpty())
+            throw std::runtime_error(DEQ_EMT_ERR);
+
+        if (idx == 0)
+            return popFront();
+
+        if (idx == size - 1)
+            return popBack();
+
+        auto tempNode = front;
+        for (std::size_t i = 0; i < idx; i++) {
+            if (i == idx)
+                break;
+            tempNode = tempNode->next;
+        }
+
+        const T popdVal = tempNode->data;
+
+        tempNode->next->prev = tempNode->prev;
+        tempNode->prev->next = tempNode->next;
+
+        size--;
+
+        return popdVal;
     }
 
     auto operator[](const std::size_t &idx) -> T &
@@ -184,6 +213,7 @@ public:
 
     void print() const
     {
+        std::print("Elements: ");
         for (std::size_t i = 0; i < size; i++) {
             std::print("{} ", (*this)[i]);
         }
@@ -193,15 +223,19 @@ public:
 
 auto main() -> int
 {
-    Deque<std::string> d;
+    Deque<int> d;
 
-    while (true) {
-        for (int i = 0; i < 10; i++) {
-            d.pushBack("hello");
-        }
-
-        d.print();
-
-        d.clear();
+    for (int i = 0; i < 10; i++) {
+        d.pushBack(i * 10);
     }
+    d.print();
+
+    std::println("poped: {}", d.popFrom(0));
+    d.print();
+
+    d.clear();
+
+    d.print();
+
+    return EXIT_SUCCESS;
 }
