@@ -8,12 +8,11 @@ constexpr auto DEQ_EMT_ERR = "Deque is empty";
 
 template <typename T>
 struct Node {
-    T                        data;
+    T                        data = 0;
     std::shared_ptr<Node<T>> next = nullptr;
     std::shared_ptr<Node<T>> prev = nullptr;
 
-    Node() :
-        data(0) {}
+    Node() = default;
     Node(T data) :
         data(data) {}
 };
