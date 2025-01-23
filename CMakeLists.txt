@@ -47,11 +47,18 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 include(sdl)
-include(glfw)
-
-# include(boost)
 include(imgui)
-include(cryptopp)
+
+add_library(
+  third-party
+  INTERFACE
+)
+
+target_link_libraries(
+  third-party
+  INTERFACE
+  imgui # sdl3 포함
+)
 
 add_subdirectory(src)
 
