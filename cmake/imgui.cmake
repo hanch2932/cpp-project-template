@@ -31,19 +31,19 @@ function(include_imgui)
     ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
   )
 
+  target_link_libraries(
+    ${TARGET_NAME}
+    PUBLIC
+    Vulkan::Vulkan
+    SDL3::SDL3
+  )
+
   target_include_directories(
     ${TARGET_NAME}
     PUBLIC
     ${IMGUI_DIR}
     ${IMGUI_DIR}/backends
     ${IMGUI_DIR}/misc/cpp
-  )
-
-  target_link_libraries(
-    ${TARGET_NAME}
-    PUBLIC
-    Vulkan::Vulkan
-    SDL3::SDL3
   )
 
   target_compile_definitions(
