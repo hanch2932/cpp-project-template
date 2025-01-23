@@ -1,4 +1,4 @@
-set(TARGET_NAME main)
+set(TARGET_NAME imgui-demo)
 
 add_executable(
   ${TARGET_NAME}
