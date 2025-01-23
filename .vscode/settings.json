@@ -8,5 +8,8 @@
     },
     "terminal.integrated.defaultProfile.windows": "mPowerShell",
     "cmake.options.statusBarVisibility": "hidden",
-    "C_Cpp.autoAddFileAssociations": false
+    "C_Cpp.autoAddFileAssociations": false,
+    "clangd.arguments": [
+        "--header-insertion=never"
+    ]
 }
