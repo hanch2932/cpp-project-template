@@ -71,7 +71,7 @@ public:
         size++;
     }
 
-    void insert(const std::size_t idx, const T &val)
+    void insert(const std::size_t &idx, const T &val)
     {
         if (idx > size - 1)
             throw std::runtime_error(INV_ACS_ERR);
