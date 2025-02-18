@@ -8,7 +8,7 @@ function(include_imgui)
   FetchContent_Declare(
     ${TARGET_NAME}
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG v1.91.7-docking
+    GIT_TAG v1.91.8-docking
     GIT_SHALLOW TRUE
   )
 
@@ -16,11 +16,11 @@ function(include_imgui)
 
   set(IMGUI_DIR ${${TARGET_NAME}_SOURCE_DIR})
 
-  find_package(Vulkan REQUIRED)
+  add_library(${TARGET_NAME} STATIC)
 
-  add_library(
+  target_sources(
     ${TARGET_NAME}
-    STATIC
+    PRIVATE
     ${IMGUI_DIR}/imgui_demo.cpp
     ${IMGUI_DIR}/imgui_draw.cpp
     ${IMGUI_DIR}/imgui_tables.cpp

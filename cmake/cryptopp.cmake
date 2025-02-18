@@ -16,10 +16,12 @@ function(include_cryptopp)
 
   set(CRYPTOPP_DIR ${${TARGET_NAME}_SOURCE_DIR})
 
+  add_library(${TARGET_NAME} STATIC)
+
   file(GLOB SRC_FILES ${CRYPTOPP_DIR}/*.cpp)
-  add_library(
+  target_sources(
     ${TARGET_NAME}
-    STATIC
+    PRIVATE
     ${SRC_FILES}
   )
 

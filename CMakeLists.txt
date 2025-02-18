@@ -9,22 +9,15 @@ project(
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set(FETCHCONTENT_BASE_DIR "${CMAKE_BINARY_DIR}/fetch-content")
 
 # 컴파일러 식별자 확인
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang") # clang compiler
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") # gcc/clang compiler
   # Clang 컴파일러를 사용할 때
-  message("\nUse ${CMAKE_CXX_COMPILER_ID} compiler")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-
-  if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
-    link_libraries(stdc++exp) # print, println 함수를 사용하기 위해 링크
-  endif()
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") # GCC compiler
-  # GCC 컴파일러를 사용할 때
   message("\nUse ${CMAKE_CXX_COMPILER_ID} compiler")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
 
@@ -44,6 +37,8 @@ message("")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+find_package(Vulkan REQUIRED)
 
 include(sdl)
 include(imgui)
