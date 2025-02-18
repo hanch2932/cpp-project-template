@@ -204,6 +204,13 @@ Write-Host "프로젝트 개발환경 관련 패키지 설치 중..."
 Write-Host "패키지 설치 완료"
 Write-Host ""
 
+# 추가 종속성 패키지 설치(이 곳에 패키지 추가)
+# Write-Host "추가 종속성 패키지 설치 중..."
+# & $bashPath -lc "pacman -Sy --noconfirm --needed \
+#                             mingw-w64-ucrt-x86_64-sdl3"
+# Write-Host "패키지 설치 완료"
+# Write-Host ""
+
 Write-Host 'Python 초기 설정 중...'
 & $bashPath -lc '/ucrt64/bin/python -m venv ~/python'
 & $bashPath -lc 'grep -qxF "export PATH=\"\$HOME/python/bin:\$PATH\"" /etc/profile || echo "export PATH=\"\$HOME/python/bin:\$PATH\"" >> /etc/profile'
