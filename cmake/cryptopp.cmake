@@ -10,6 +10,7 @@ function(include_cryptopp)
     GIT_REPOSITORY https://github.com/weidai11/cryptopp.git
     GIT_TAG CRYPTOPP_8_9_0
     GIT_SHALLOW TRUE
+    SOURCE_DIR ${FETCHCONTENT_BASE_DIR}/${TARGET_NAME}
   )
 
   FetchContent_MakeAvailable(${TARGET_NAME})
@@ -29,6 +30,7 @@ function(include_cryptopp)
     ${TARGET_NAME}
     PUBLIC
     ${CRYPTOPP_DIR}
+    ${CRYPTOPP_DIR}/..
   )
 
   target_compile_options(
