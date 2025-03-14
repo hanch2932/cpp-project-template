@@ -36,7 +36,7 @@ else {
 Write-Host ""
 
 # MSYS2 최신 설치 파일 URL
-$gitTag = "2024-11-16" # 버전 업데이트 시 직접 변경 필요
+$gitTag = "2025-02-21" # 버전 업데이트 시 직접 변경 필요
 $cleanTag = $gitTag -replace "-", ""
 $MSYS2_URL = "https://github.com/msys2/msys2-installer/releases/download/$gitTag/msys2-x86_64-$cleanTag.exe"
 
