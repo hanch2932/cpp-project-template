@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.30.0)
 
+if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
+  set(ENV{VCPKG_DEFAULT_HOST_TRIPLET} "x64-mingw-dynamic")
+  set(ENV{VCPKG_DEFAULT_TRIPLET} "x64-mingw-dynamic")
+  set(VCPKG_TARGET_TRIPLET "x64-mingw-dynamic")
+endif()
+
 project(
   cpp-template
   VERSION 0.1.0
