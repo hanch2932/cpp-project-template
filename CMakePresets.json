@@ -8,7 +8,8 @@
             "installDir": "${sourceDir}/out/install/${presetName}",
             "generator": "Ninja",
             "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES"
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+                "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             }
         },
         {

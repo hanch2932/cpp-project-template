@@ -1,0 +1,6 @@
+{
+  "dependencies": [
+    "vulkan-validationlayers",
+    "sdl3"
+  ]
+}
