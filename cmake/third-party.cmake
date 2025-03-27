@@ -6,6 +6,7 @@ if(NOT SDL3_FOUND)
 endif()
 
 include(imgui)
+include(google-test)
 
 add_library(
   third-party
