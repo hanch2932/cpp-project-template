@@ -25,7 +25,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") # gcc/clang compiler
     link_libraries(stdc++exp) # print, println 함수를 사용하기 위해 링크
   endif()
 else()
-  message(FATAL_ERROR "\nUnkown compiler")
+  message(FATAL_ERROR "\nUnsupported compiler")
 endif()
 
 message("CMake CXX Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
