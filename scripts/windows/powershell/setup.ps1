@@ -205,11 +205,12 @@ Write-Host "패키지 설치 완료"
 Write-Host ""
 
 # 추가 종속성 패키지 설치(이 곳에 패키지 추가)
-# Write-Host "추가 종속성 패키지 설치 중..."
-# & $bashPath -lc "pacman -Sy --noconfirm --needed \
-#                             mingw-w64-ucrt-x86_64-sdl3"
-# Write-Host "패키지 설치 완료"
-# Write-Host ""
+Write-Host "추가 종속성 패키지 설치 중..."
+& $bashPath -lc "pacman -Sy --noconfirm --needed \
+                            mingw-w64-ucrt-x86_64-sdl3 \
+                            mingw-w64-ucrt-x86_64-vulkan-devel"
+Write-Host "패키지 설치 완료"
+Write-Host ""
 
 Write-Host 'Python 초기 설정 중...'
 & $bashPath -lc '/ucrt64/bin/python -m venv ~/python'
