@@ -6,6 +6,8 @@ if(NOT SDL3_FOUND)
 endif()
 
 include(imgui)
+include(fmt)
+include(scn)
 include(google-test)
 
 add_library(
@@ -17,4 +19,6 @@ target_link_libraries(
   third-party
   INTERFACE
   imgui # sdl3 포함
+  fmt::fmt
+  scn::scn
 )
