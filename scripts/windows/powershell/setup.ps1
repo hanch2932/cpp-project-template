@@ -7,6 +7,98 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     Exit
 }
 
+function Add-PathToSystemEnvironment {
+    param(
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipeline = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$PathToAdd
+    )
+
+    Write-Verbose "Function Start: Add-PathToSystemEnvironment"
+    Write-Verbose "Input Path: $PathToAdd"
+
+    # 시스템 PATH 읽기 (확장된 상태)
+    try {
+        $currentSystemPathExpanded = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+        Write-Verbose "Current expanded system PATH read successfully."
+    } catch {
+        Write-Error "시스템 PATH 환경 변수를 읽는 데 실패했습니다: $($_.Exception.Message)"
+        return # 함수 실행 중단
+    }
+
+    # 경로 존재 여부 확인
+    $pathEntries = $currentSystemPathExpanded -split ';' | Where-Object { $_ -ne '' }
+    Write-Host "$PathToAdd 경로가 시스템 PATH에 존재하는지 확인합니다..."
+    if ($pathEntries -contains $PathToAdd) {
+        Write-Host "$PathToAdd 경로가 이미 PATH에 존재합니다."
+    }
+    else {
+        Write-Host "$PathToAdd 경로가 PATH에 존재하지 않습니다. 추가를 시도합니다..."
+
+        # WhatIf/Confirm 지원
+        if ($pscmdlet.ShouldProcess("시스템 환경 변수 PATH", "경로 '$PathToAdd' 추가")) {
+
+            $regKey = $null # 명시적 초기화
+            try {
+                # 레지스트리 키 열기 (읽기/쓰기)
+                $regPath = "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+                Write-Verbose "Opening registry key HKLM\$regPath for read/write..."
+                $regKey = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($regPath, $true) # $true = 쓰기 가능
+
+                if (-not $regKey) {
+                    throw "레지스트리 키 'HKLM\$regPath'를 열 수 없습니다. 권한을 확인하세요."
+                }
+
+                # 원본 PATH 값 가져오기 (비확장)
+                Write-Verbose "Retrieving non-expanded 'Path' value..."
+                $originalRawPath = $regKey.GetValue("Path", "", [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
+                Write-Verbose "Original non-expanded system PATH: $originalRawPath"
+
+                # 새 PATH 값 구성
+                $newPathValue = if ([string]::IsNullOrEmpty($originalRawPath)) {
+                                    $PathToAdd
+                                } else {
+                                    "$PathToAdd;$originalRawPath"
+                                }
+                Write-Verbose "Constructed new PATH value: $newPathValue"
+
+                # 레지스트리에 새 PATH 값 쓰기 (ExpandString 타입) - SetValue 사용
+                Write-Verbose "Setting 'Path' value in registry using SetValue (ExpandString)..."
+                $regKey.SetValue("Path", $newPathValue, [Microsoft.Win32.RegistryValueKind]::ExpandString)
+
+                Write-Host "시스템 PATH가 성공적으로 업데이트되었습니다."
+                Write-Host "참고: 변경 사항은 새 프로세스 또는 시스템 재시작 시 적용됩니다."
+
+            } catch {
+                # 레지스트리 작업 중 오류 처리
+                Write-Error "시스템 PATH 업데이트 중 오류 발생: $($_.Exception.Message)"
+            } finally {
+                # *** 중요: 레지스트리 핸들 닫기 ***
+                if ($regKey -ne $null) {
+                    Write-Verbose "Closing registry key handle."
+                    $regKey.Close()
+                }
+            }
+        } else {
+            Write-Warning "사용자 요청 또는 WhatIf 플래그로 인해 시스템 PATH 변경이 취소되었습니다."
+        }
+    }
+    Write-Verbose "Function End: Add-PathToSystemEnvironment"
+    Write-Host ""
+}
+
+function Renew-SystemPathVariable {
+    $SYSTEM_PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
+    $USER_PATH = [System.Environment]::GetEnvironmentVariable("PATH", "User")
+    $env:PATH = "$SYSTEM_PATH;$USER_PATH"
+
+    # 연속된 세미콜론을 하나로 줄임
+    $env:PATH = $env:PATH -replace ';;+', ';'
+
+    # 맨 앞이나 맨 뒤에 세미콜론이 있는지 확인하고 제거
+    $env:PATH = $env:PATH.Trim(';')
+}
+
 # PowerShell 실행 정책을 RemoteSigned로 변경
 Write-Host "PowerShell 실행 정책을 RemoteSigned로 변경..."
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
@@ -64,75 +156,22 @@ if (Test-Path -Path $MSYS2_DIR) {
 Write-Host ""
 
 # 현재 시스템 PATH 가져오기(경로에 포함된 환경변수를 치환해서 가져온다.)
-$CURRENT_PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+# $CURRENT_PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
 
 # 추가할 경로 설정
 $NEW_PATH = "$MSYS2_DIR\usr\bin"
 $NEW_PATH2 = "$MSYS2_DIR\ucrt64\bin"
 
 # ucrt64/bin 디렉토리가 PATH에 존재하는지 확인
-Write-Host "기존 PATH:"
-Write-Host $CURRENT_PATH
-Write-Host ""
-Write-Host "추가할 PATH:"
-Write-Host "$NEW_PATH2;$NEW_PATH"
-Write-Host ""
+# Write-Host "기존 PATH:"
+# Write-Host $CURRENT_PATH
+# Write-Host ""
+# Write-Host "추가할 PATH:"
+# Write-Host "$NEW_PATH2;$NEW_PATH"
+# Write-Host ""
 
-# NEW_PATH 경로가 시스템 PATH에 존재하는지 확인
-Write-Host "$NEW_PATH 경로가 시스템 PATH에 존재하는지 확인합니다..."
-if ($CURRENT_PATH -split ";" -contains $NEW_PATH) {
-    Write-Host "$NEW_PATH 경로가 이미 PATH에 존재합니다."
-}
-else {
-    Write-Host "$NEW_PATH 경로가 PATH에 존재하지 않습니다. $NEW_PATH 경로를 추가합니다..."
-    
-    # 경로에 포함되어 있는 환경변수를 치환하지 않고 그대로 가져오기
-    $REG_PATH = "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
-    $REG_KEY = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($REG_PATH, $true)
-    $ORIGINAL_PATH = $REG_KEY.GetValue("Path", "", [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
-
-    # 레지스트리에 값을 저장할 때 경로에 포함된 환경변수 인식을 위해 ExpandString 타입으로 저장해야 한다.
-
-    # 방법 1
-    $REG_SYSTEM_PATH = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
-    Remove-ItemProperty -Path $REG_SYSTEM_PATH -Name "Path"
-    New-ItemProperty -Path $REG_SYSTEM_PATH -Name "Path" -Value "$NEW_PATH;$ORIGINAL_PATH" -PropertyType ExpandString
-
-    # 방법 2
-    # $REG_KEY.SetValue("Path", "$NEW_PATH;$ORIGINAL_PATH", [Microsoft.Win32.RegistryValueKind]::ExpandString)
-
-    Write-Host "시스템 PATH가 성공적으로 업데이트되었습니다."
-}
-Write-Host ""
-
-$CURRENT_PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
-
-# NEW_PATH2 경로가 시스템 PATH에 존재하는지 확인
-Write-Host "$NEW_PATH2 경로가 시스템 PATH에 존재하는지 확인합니다..."
-if ($CURRENT_PATH -split ";" -contains $NEW_PATH2) {
-    Write-Host "$NEW_PATH2 경로가 이미 PATH에 존재합니다."
-}
-else {
-    Write-Host "$NEW_PATH2 경로가 PATH에 존재하지 않습니다. $NEW_PATH2 경로를 추가합니다..."
-
-    # 경로에 포함되어 있는 환경변수를 치환하지 않고 그대로 가져오기
-    $REG_PATH = "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
-    $REG_KEY = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($REG_PATH, $true)
-    $ORIGINAL_PATH = $REG_KEY.GetValue("Path", "", [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
-
-    # 레지스트리에 값을 저장할 때 경로에 포함된 환경변수 인식을 위해 ExpandString 타입으로 저장해야 한다.
-
-    # 방법 1
-    $REG_SYSTEM_PATH = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
-    Remove-ItemProperty -Path $REG_SYSTEM_PATH -Name "Path"
-    New-ItemProperty -Path $REG_SYSTEM_PATH -Name "Path" -Value "$NEW_PATH2;$ORIGINAL_PATH" -PropertyType ExpandString
-
-    # 방법 2
-    # $REG_KEY.SetValue("Path", "$NEW_PATH2;$ORIGINAL_PATH", [Microsoft.Win32.RegistryValueKind]::ExpandString)
-
-    Write-Host "시스템 PATH가 성공적으로 업데이트되었습니다."
-}
-Write-Host ""
+Add-PathToSystemEnvironment -PathToAdd $NEW_PATH
+Add-PathToSystemEnvironment -PathToAdd $NEW_PATH2
 
 # MSYS2_PATH 환경 변수 설정 (시스템 변수로 설정)
 Write-Host "MSYS2_PATH 변수 설정을 확인합니다..."
@@ -147,118 +186,24 @@ else {
 Write-Host ""
 
 Write-Host "이 세션의 PATH 변수 갱신 중..."
-$SYSTEM_PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
-$USER_PATH = [System.Environment]::GetEnvironmentVariable("PATH", "User")
-$env:PATH = "$SYSTEM_PATH;$USER_PATH"
-
-# 연속된 세미콜론을 하나로 줄임
-$env:PATH = $env:PATH -replace ';;+', ';'
-
-# 맨 앞이나 맨 뒤에 세미콜론이 있는지 확인하고 제거
-$env:PATH = $env:PATH.Trim(';')
-
+Renew-SystemPathVariable
 Write-Host "$env:Path"
 Write-Host "완료"
 Write-Host ""
 
 $bashPath = "$MSYS2_DIR\usr\bin\bash.exe"
 
-Write-Host "MSYS2 초기 설정 중..."
-# /etc/pacman.conf 설정 값 수정
-& $bashPath -lc "sed -i 's/^#\?\s*ParallelDownloads\s*=.*/ParallelDownloads = 10/' /etc/pacman.conf"
-& $bashPath -lc "sed -i 's/^\s*CheckSpace/#&/' /etc/pacman.conf"
-& $bashPath -lc "sed -i 's/^#\?\s*VerbosePkgLists/VerbosePkgLists/' /etc/pacman.conf"
-Write-Host "완료"
+Write-Host "MSYS2 초기 설정을 시작합니다."
+& $bashPath -lc "cd '$PSScriptRoot'; ../bash/setup.sh"
+Write-Host "MSYS2 초기 설정이 모두 완료되었습니다."
 Write-Host ""
-
-# Write-Host "미리 정렬된 미러리스트 적용..."
-# & $bashPath -lc "cd '$PSScriptRoot'; ../bash/init-mirrors.sh"
-# Write-Host "완료"
-# Write-Host ""
-
-# 시스템 업데이트 실행
-Write-Host "MSYS2 시스템 업데이트 중..."
-& $bashPath -lc "pacman -Syu --noconfirm"
-Write-Host "MSYS2 시스템 업데이트 완료"
-Write-Host ""
-
-# 나머지 패키지 업데이트
-Write-Host "나머지 패키지 업데이트 중..."
-& $bashPath -lc "pacman -Syu --noconfirm"
-Write-Host "패키지 업데이트 완료"
-Write-Host ""
-
-# 개발 환경 관련 패키지 설치
-Write-Host "프로젝트 개발환경 관련 패키지 설치 중..."
-& $bashPath -lc "pacman -Sy --noconfirm --needed \
-                            base-devel \
-                            bc \
-                            mingw-w64-ucrt-x86_64-toolchain \
-                            mingw-w64-ucrt-x86_64-clang \
-                            mingw-w64-ucrt-x86_64-clang-tools-extra \
-                            mingw-w64-ucrt-x86_64-ninja \
-                            mingw-w64-ucrt-x86_64-cmake \
-                            mingw-w64-ucrt-x86_64-gettext-tools \
-                            mingw-w64-ucrt-x86_64-doxygen \
-                            mingw-w64-ucrt-x86_64-python-pip"
-Write-Host "패키지 설치 완료"
-Write-Host ""
-
-# 추가 종속성 패키지 설치(이 곳에 패키지 추가)
-Write-Host "추가 종속성 패키지 설치 중..."
-& $bashPath -lc "pacman -Sy --noconfirm --needed \
-                            mingw-w64-ucrt-x86_64-sdl3 \
-                            mingw-w64-ucrt-x86_64-vulkan-devel"
-Write-Host "패키지 설치 완료"
-Write-Host ""
-
-Write-Host 'Python 초기 설정 중...'
-& $bashPath -lc '/ucrt64/bin/python -m venv --system-site-packages ~/python-venv'
-& $bashPath -lc 'grep -qxF "export PATH=\"\$HOME/python-venv/bin:\$PATH\"" /etc/profile || echo "export PATH=\"\$HOME/python-venv/bin:\$PATH\"" >> /etc/profile'
-Write-Host '완료'
-Write-Host ''
 
 $PYTHON_PATH = "$MSYS2_DIR\home\$env:USERNAME\python-venv\bin"
-$CURRENT_PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
 
-# PYTHON_PATH 경로가 시스템 PATH에 존재하는지 확인
-Write-Host "$PYTHON_PATH 경로가 시스템 PATH에 존재하는지 확인합니다..."
-if ($CURRENT_PATH -split ";" -contains $PYTHON_PATH) {
-    Write-Host "$PYTHON_PATH 경로가 이미 PATH에 존재합니다."
-}
-else {
-    Write-Host "$PYTHON_PATH 경로가 PATH에 존재하지 않습니다. $PYTHON_PATH 경로를 추가합니다..."
-
-    # 경로에 포함되어 있는 환경변수를 치환하지 않고 그대로 가져오기
-    $REG_PATH = "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
-    $REG_KEY = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($REG_PATH, $true)
-    $ORIGINAL_PATH = $REG_KEY.GetValue("Path", "", [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
-
-    # 레지스트리에 값을 저장할 때 경로에 포함된 환경변수 인식을 위해 ExpandString 타입으로 저장해야 한다.
-
-    # 방법 1
-    $REG_SYSTEM_PATH = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
-    Remove-ItemProperty -Path $REG_SYSTEM_PATH -Name "Path"
-    New-ItemProperty -Path $REG_SYSTEM_PATH -Name "Path" -Value "$PYTHON_PATH;$ORIGINAL_PATH" -PropertyType ExpandString
-
-    # 방법 2
-    # $REG_KEY.SetValue("Path", "$NEW_PATH2;$ORIGINAL_PATH", [Microsoft.Win32.RegistryValueKind]::ExpandString)
-
-    Write-Host "시스템 PATH가 성공적으로 업데이트되었습니다."
-}
-Write-Host ""
+Add-PathToSystemEnvironment -PathToAdd $PYTHON_PATH
 
 Write-Host "이 세션의 PATH 변수 갱신 중..."
-$SYSTEM_PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
-$USER_PATH = [System.Environment]::GetEnvironmentVariable("PATH", "User")
-$env:PATH = "$SYSTEM_PATH;$USER_PATH"
-
-# 연속된 세미콜론을 하나로 줄임
-$env:PATH = $env:PATH -replace ';;+', ';'
-
-# 맨 앞이나 맨 뒤에 세미콜론이 있는지 확인하고 제거
-$env:PATH = $env:PATH.Trim(';')
-
+Renew-SystemPathVariable
 Write-Host "$env:Path"
 Write-Host "완료"
 Write-Host ""
