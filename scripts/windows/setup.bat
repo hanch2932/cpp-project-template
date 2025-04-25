@@ -23,7 +23,9 @@ if not %errorlevel% == 0 (
 )
 
 echo.
-echo 이 작업은 최초 실행 시 10분 정도 소요됩니다. 잠시만 기다려주세요...
+echo 이 작업은 최초 실행 시 10분 정도 소요됩니다.
+echo 인터넷 상태에 따라 소요 시간이 달라질 수 있습니다.
+echo 작업이 완료될 때까지 기다려 주세요...
 "C:\Windows\System32\timeout" /t 3 /nobreak > nul
 echo.
 
