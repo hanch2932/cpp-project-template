@@ -171,10 +171,10 @@ Write-Host "MSYS2 초기 설정 중..."
 Write-Host "완료"
 Write-Host ""
 
-Write-Host "미리 정렬된 미러리스트 적용..."
-& $bashPath -lc "cd '$PSScriptRoot'; ../bash/init-mirrors.sh"
-Write-Host "완료"
-Write-Host ""
+# Write-Host "미리 정렬된 미러리스트 적용..."
+# & $bashPath -lc "cd '$PSScriptRoot'; ../bash/init-mirrors.sh"
+# Write-Host "완료"
+# Write-Host ""
 
 # 시스템 업데이트 실행
 Write-Host "MSYS2 시스템 업데이트 중..."
@@ -213,12 +213,12 @@ Write-Host "패키지 설치 완료"
 Write-Host ""
 
 Write-Host 'Python 초기 설정 중...'
-& $bashPath -lc '/ucrt64/bin/python -m venv ~/python'
-& $bashPath -lc 'grep -qxF "export PATH=\"\$HOME/python/bin:\$PATH\"" /etc/profile || echo "export PATH=\"\$HOME/python/bin:\$PATH\"" >> /etc/profile'
+& $bashPath -lc '/ucrt64/bin/python -m venv --system-site-packages ~/python-venv'
+& $bashPath -lc 'grep -qxF "export PATH=\"\$HOME/python-venv/bin:\$PATH\"" /etc/profile || echo "export PATH=\"\$HOME/python-venv/bin:\$PATH\"" >> /etc/profile'
 Write-Host '완료'
 Write-Host ''
 
-$PYTHON_PATH = "$MSYS2_DIR\home\$env:USERNAME\python\bin"
+$PYTHON_PATH = "$MSYS2_DIR\home\$env:USERNAME\python-venv\bin"
 $CURRENT_PATH = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
 
 # PYTHON_PATH 경로가 시스템 PATH에 존재하는지 확인
