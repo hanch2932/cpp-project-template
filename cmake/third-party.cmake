@@ -7,8 +7,8 @@ endif()
 
 include(imgui)
 include(fmt)
-include(scn)
-include(google-test)
+# include(scn)
+# include(google-test)
 
 add_library(
   third-party
@@ -20,5 +20,5 @@ target_link_libraries(
   INTERFACE
   imgui # sdl3 포함
   fmt::fmt
-  scn::scn
+  # scn::scn
 )
