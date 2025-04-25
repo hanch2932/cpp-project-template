@@ -66,6 +66,8 @@ function Add-PathToSystemEnvironment {
                 Write-Verbose "Setting 'Path' value in registry using SetValue (ExpandString)..."
                 $regKey.SetValue("Path", $newPathValue, [Microsoft.Win32.RegistryValueKind]::ExpandString)
 
+                Renew-SystemPathVariable
+
                 Write-Host "시스템 PATH가 성공적으로 업데이트되었습니다."
                 Write-Host "참고: 변경 사항은 새 프로세스 또는 시스템 재시작 시 적용됩니다."
 
@@ -185,10 +187,7 @@ else {
 }
 Write-Host ""
 
-Write-Host "이 세션의 PATH 변수 갱신 중..."
-Renew-SystemPathVariable
 Write-Host "$env:Path"
-Write-Host "완료"
 Write-Host ""
 
 $bashPath = "$MSYS2_DIR\usr\bin\bash.exe"
@@ -206,18 +205,7 @@ $PYTHON_PATH = "$MSYS2_DIR\home\$env:USERNAME\python-venv\bin"
 
 Add-PathToSystemEnvironment -PathToAdd $PYTHON_PATH
 
-Write-Host "이 세션의 PATH 변수 갱신 중..."
-Renew-SystemPathVariable
 Write-Host "$env:Path"
-Write-Host "완료"
-Write-Host ""
-
-# Python 패키지 설치
-Write-Host "Python 패키지 설치 중..."
-& python -m pip install --upgrade pip
-Write-Host ""
-& pip install mkdocs mkdocs-material mkdoxy
-Write-Host "패키지 설치 완료"
 Write-Host ""
 
 # VSCode 확장 설치
