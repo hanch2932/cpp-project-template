@@ -194,7 +194,11 @@ Write-Host ""
 $bashPath = "$MSYS2_DIR\usr\bin\bash.exe"
 
 Write-Host "MSYS2 초기 설정을 시작합니다."
-& $bashPath -lc "cd '$PSScriptRoot'; ../bash/setup.sh"
+& $bashPath -lc "cd '$PSScriptRoot'; ../bash/setup-pacman.sh"
+& $bashPath -lc "cd '$PSScriptRoot'; ../bash/update-packages.sh"
+& $bashPath -lc "cd '$PSScriptRoot'; ../bash/update-packages.sh"
+& $bashPath -lc "cd '$PSScriptRoot'; ../bash/install-deps.sh"
+& $bashPath -lc "cd '$PSScriptRoot'; ../bash/setup-python.sh"
 Write-Host "MSYS2 초기 설정이 모두 완료되었습니다."
 Write-Host ""
 
