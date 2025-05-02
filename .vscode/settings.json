@@ -5,6 +5,13 @@
             "source": "PowerShell",
             "args": ["-NoExit", "-Command ", "[System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8; [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8"],
         },
+        "MSYS2 UCRT": {
+            "path": "cmd.exe",
+            "args": [
+                "/c",
+                "C:\\msys64\\msys2_shell.cmd -defterm -here -no-start -ucrt64"
+            ]
+        }
     },
     "terminal.integrated.defaultProfile.windows": "mPowerShell",
     "cmake.options.statusBarVisibility": "hidden",
