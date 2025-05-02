@@ -18,15 +18,5 @@
     "C_Cpp.autoAddFileAssociations": false,
     "clangd.arguments": [
         "--header-insertion=never"
-    ],
-    "terminal.integrated.env.windows": {
-        "PATH": "${env:MSYS2_PATH};${env:PATH}"
-    },
-    "cmake.cmakePath": "${env:MSYS2_ROOT}\\ucrt64\\bin\\cmake",
-    "cmake.configureEnvironment": {
-        "PATH": "${env:MSYS2_PATH};${env:PATH}"
-    },
-    "cmake.buildEnvironment": {
-        "PATH": "${env:MSYS2_PATH};${env:PATH}"
-    }
+    ]
 }
