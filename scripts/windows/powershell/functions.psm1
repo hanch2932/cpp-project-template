@@ -58,7 +58,7 @@ function Add-PathToSystemEnvironment {
                 Write-Verbose "Setting 'Path' value in registry using SetValue (ExpandString)..."
                 $regKey.SetValue("Path", $newPathValue, [Microsoft.Win32.RegistryValueKind]::ExpandString)
 
-                Renew-SystemPathVariable
+                Update-SystemPathVariable
 
                 Write-Host "시스템 PATH가 성공적으로 업데이트되었습니다."
                 Write-Host "참고: 변경 사항은 새 프로세스 또는 시스템 재시작 시 적용됩니다."
@@ -88,8 +88,13 @@ function Set-SystemEnvironmentVariable {
         [string]$VariableName,
 
         [Parameter(Mandatory = $true, Position = 1)]
-        [string]$VariableValue
+        [string]$VariableValue,
+
+        [Parameter(Mandatory = $true, Position = 2)]
+        [string]$PropertyType
     )
+
+    $regPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 
     Write-Host "Checking system environment variable '$VariableName'..."
 
@@ -105,7 +110,11 @@ function Set-SystemEnvironmentVariable {
         # Use ShouldProcess for -WhatIf / -Confirm support
         if ($PSCmdlet.ShouldProcess("System Environment Variable '$VariableName'", "Set Value to '$VariableValue'")) {
             try {
-                [System.Environment]::SetEnvironmentVariable($VariableName, $VariableValue, $targetScope)
+                New-ItemProperty -Path $regPath `
+                                 -Name $VariableName `
+                                 -Value $VariableValue `
+                                 -PropertyType $PropertyType `
+                                 -Force ` # 만약 이름은 같지만 타입이 다른 값이 존재하면 덮어쓰기 시도
 
                 # Verify after setting (optional but recommended)
                 $newValueCheck = [System.Environment]::GetEnvironmentVariable($VariableName, $targetScope)
