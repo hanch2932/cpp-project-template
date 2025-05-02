@@ -21,18 +21,18 @@ if (Test-Path $settingsFilePath) {
     $newProfile = @{
         guid = "{$newGuid}"
         name = "MSYS2 UCRT64"
-        commandline = "%MSYS2_PATH%/msys2_shell.cmd -defterm -here -no-start -ucrt64"
-        startingDirectory = "%MSYS2_PATH%/home/%USERNAME%"
-        icon = "%MSYS2_PATH%/ucrt64.ico"
+        commandline = "%MSYS2_ROOT%/msys2_shell.cmd -defterm -here -no-start -ucrt64"
+        startingDirectory = "%MSYS2_ROOT%/home/%USERNAME%"
+        icon = "%MSYS2_ROOT%/ucrt64.ico"
     }
 
     $newGuid2 = [guid]::NewGuid()
     $newProfile2 = @{
         guid = "{$newGuid2}"
         name = "MSYS2 MSYS"
-        commandline = "%MSYS2_PATH%/msys2_shell.cmd -defterm -here -no-start -msys"
-        startingDirectory = "%MSYS2_PATH%/home/%USERNAME%"
-        icon = "%MSYS2_PATH%/msys2.ico"
+        commandline = "%MSYS2_ROOT%/msys2_shell.cmd -defterm -here -no-start -msys"
+        startingDirectory = "%MSYS2_ROOT%/home/%USERNAME%"
+        icon = "%MSYS2_ROOT%/msys2.ico"
     }
 
     # 중복 확인 후 추가
