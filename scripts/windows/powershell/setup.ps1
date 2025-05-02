@@ -43,13 +43,14 @@ Write-Host ""
 & $PSScriptRoot\install-msys2.ps1
 
 # 윈도우 터미널 프로필에 MSYS2 관련 셸 추가
-& $PSScriptRoot\add-wt-profiles.ps1
+# & $PSScriptRoot\add-wt-profiles.ps1
 
 $MSYS2_ROOT = "C:\msys64"
 
 # MSYS2_ROOT 및 MSYS2_PATH 환경 변수 설정 (시스템 변수로 설정)
-Set-SystemEnvironmentVariable -VariableName "MSYS2_ROOT" -VariableValue "$MSYS2_ROOT"
-Set-SystemEnvironmentVariable -VariableName "MSYS2_PATH" -VariableValue "%MSYS2_ROOT%\ucrt64\bin;%MSYS2_ROOT%\usr\bin"
+Set-SystemEnvironmentVariable -VariableName "MSYS2_ROOT" -VariableValue "$MSYS2_ROOT" -PropertyType String
+Set-SystemEnvironmentVariable -VariableName "MSYS2_PATH" -VariableValue "%MSYS2_ROOT%\home\%USERNAME%\python-venv\bin;%MSYS2_ROOT%\ucrt64\bin;%MSYS2_ROOT%\usr\bin" -PropertyType ExpandString
+Add-PathToSystemEnvironment -PathToAdd "%MSYS2_PATH%"
 
 $bashPath = "$MSYS2_ROOT\usr\bin\bash.exe"
 
