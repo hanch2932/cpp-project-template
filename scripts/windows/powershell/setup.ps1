@@ -72,5 +72,5 @@ Write-Host "설치 완료"
 Write-Host ""
 
 Write-Host "모든 개발환경 설정이 완료되었습니다."
-Write-Host "실행 중인 VSCode를 모두 종료한 뒤 다시 실행하세요."
+Write-Host "컴퓨터를 재시작 하십시오."
 Write-Host ""
