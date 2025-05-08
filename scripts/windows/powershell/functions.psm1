@@ -115,15 +115,6 @@ function Set-SystemEnvironmentVariable {
                                  -Value $VariableValue `
                                  -PropertyType $PropertyType `
                                  -Force ` # 만약 이름은 같지만 타입이 다른 값이 존재하면 덮어쓰기 시도
-
-                # Verify after setting (optional but recommended)
-                $newValueCheck = [System.Environment]::GetEnvironmentVariable($VariableName, $targetScope)
-                if ($newValueCheck -eq $VariableValue) {
-                     Write-Host "'$VariableName' set to '$VariableValue' in the System scope successfully."
-                     Write-Host "Note: A system restart or logoff/logon might be needed for all applications to see the change."
-                } else {
-                     Write-Error "Attempted to set '$VariableName', but verification failed. Expected '$VariableValue', found '$newValueCheck'. Manual check needed."
-                }
             }
             catch {
                 Write-Error "Failed to set system environment variable '$VariableName'. Error: $($_.Exception.Message)"
