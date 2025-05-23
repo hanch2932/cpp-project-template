@@ -48,9 +48,9 @@ Write-Host ""
 $MSYS2_ROOT = "C:\msys64"
 
 # MSYS2_ROOT 및 MSYS2_PATH 환경 변수 설정 (시스템 변수로 설정)
+Add-PathToSystemEnvironment -PathToAdd "%MSYS2_PATH%"
 Set-SystemEnvironmentVariable -VariableName "MSYS2_ROOT" -VariableValue "$MSYS2_ROOT" -PropertyType String
 Set-SystemEnvironmentVariable -VariableName "MSYS2_PATH" -VariableValue "%MSYS2_ROOT%\home\%USERNAME%\python-venv\bin;%MSYS2_ROOT%\ucrt64\bin;%MSYS2_ROOT%\usr\bin" -PropertyType ExpandString
-Add-PathToSystemEnvironment -PathToAdd "%MSYS2_PATH%"
 
 $bashPath = "$MSYS2_ROOT\usr\bin\bash.exe"
 
