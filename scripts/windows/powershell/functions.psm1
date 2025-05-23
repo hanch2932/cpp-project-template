@@ -155,7 +155,7 @@ function Add-PathToSystemEnvironment {
                 $newPathValue = if ([string]::IsNullOrEmpty($originalRawPath)) {
                                     $trimmedPathToAdd
                                 } else {
-                                    $trimmedPathToAdd;$originalRawPath
+                                    "$trimmedPathToAdd;$originalRawPath"
                                 }
                 Write-Verbose "Constructed new PATH value: $newPathValue"
 
