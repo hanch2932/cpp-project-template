@@ -46,16 +46,16 @@ Write-Host ""
 # & $PSScriptRoot\add-wt-profiles.ps1
 
 $MSYS2_ROOT = "C:\msys64"
-$MSYS2_PATH = "%MSYS2_ROOT%\home\%USERNAME%\python-venv\bin;%MSYS2_ROOT%\ucrt64\bin;%MSYS2_ROOT%\usr\bin"
+$MSYS2_PATH = "$MSYS2_ROOT\home\%USERNAME%\python-venv\bin;$MSYS2_ROOT\ucrt64\bin;$MSYS2_ROOT\usr\bin"
 
 # MSYS2_ROOT 및 MSYS2_PATH 환경 변수 설정 (시스템 변수로 설정) (String, ExpandString)
 Set-SystemEnvironmentVariable -VariableName "MSYS2_ROOT" -VariableValue $MSYS2_ROOT -PropertyType String
 Set-SystemEnvironmentVariable -VariableName "MSYS2_PATH" -VariableValue $MSYS2_PATH -PropertyType String
 
-# 현재 이유는 알 수 없으나 스크립트 상에서 MSYS2_PATH를 ExpandString 타입으로 설정하고 
-# 해당 변수를 시스템 PATH에 추가하면 확장되지 않는 문제가 있다.
-# 환경변수 설정 UI에서 시스템 Path 변수에 직접 %MSYS2_PATH%를 추가하면 문제 없이 확장된다.
-#
+# 현재 이유는 알 수 없으나 스크립트 상에서 MSYS2_PATH를 설정하고 재부팅 없이
+# 스크립트로 시스템 Path 변수에 %MSYS2_PATH%를 추가하면 변수가 확장되지 않는 문제가 있다.
+# 환경변수 설정 UI에서 시스템 Path 변수에 직접 %MSYS2_PATH%를 추가하면 문제 없이 확장되는
+# 것으로 보아 스크립트나 세션관련 문제인 것으로 보이나 정확한 원인은 모른다.
 # 스크립트로 설정하면 계속 문제가 발생하여 현재는 MSYS2_PATH 변수를 String 타입으로 설정한 상태다.
 Add-PathToSystemEnvironment -PathToAdd "%MSYS2_PATH%"
 
