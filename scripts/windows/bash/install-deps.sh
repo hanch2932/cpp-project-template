@@ -10,8 +10,7 @@ pacman -Sy --noconfirm --needed \
             mingw-w64-ucrt-x86_64-ninja \
             mingw-w64-ucrt-x86_64-cmake \
             mingw-w64-ucrt-x86_64-gettext-tools \
-            mingw-w64-ucrt-x86_64-doxygen \
-            mingw-w64-ucrt-x86_64-python-pip
+            mingw-w64-ucrt-x86_64-doxygen
 echo "패키지 설치 완료"
 echo ""
 

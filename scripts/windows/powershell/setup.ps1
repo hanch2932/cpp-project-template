@@ -46,7 +46,7 @@ Write-Host ""
 # & $PSScriptRoot\add-wt-profiles.ps1
 
 $MSYS2_ROOT = "C:\msys64"
-$MSYS2_PATH = "$MSYS2_ROOT\home\%USERNAME%\python-venv\bin;$MSYS2_ROOT\ucrt64\bin;$MSYS2_ROOT\usr\bin"
+$MSYS2_PATH = "$MSYS2_ROOT\home\%USERNAME%\python\msys2-venv\Scripts;$MSYS2_ROOT\ucrt64\bin;$MSYS2_ROOT\usr\bin"
 
 # MSYS2_ROOT 및 MSYS2_PATH 환경 변수 설정 (시스템 변수로 설정) (String, ExpandString)
 Set-SystemEnvironmentVariable -VariableName "MSYS2_ROOT" -VariableValue $MSYS2_ROOT -PropertyType String
@@ -66,7 +66,8 @@ Write-Host "MSYS2 초기 설정을 시작합니다."
 & $bashPath -lc "cd '$PSScriptRoot'; ../bash/update-packages.sh"
 & $bashPath -lc "cd '$PSScriptRoot'; ../bash/update-packages.sh"
 & $bashPath -lc "cd '$PSScriptRoot'; ../bash/install-deps.sh"
-& $bashPath -lc "cd '$PSScriptRoot'; ../bash/setup-python.sh"
+# & $bashPath -lc "cd '$PSScriptRoot'; ../bash/setup-python.sh"
+& $PSScriptRoot\setup-python.ps1
 Write-Host "MSYS2 초기 설정이 모두 완료되었습니다."
 Write-Host ""
 
