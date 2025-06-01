@@ -296,7 +296,7 @@ def set_system_environment_variable(var_name, var_value, var_type="REG_SZ"):
 
 
 def add_to_system_path(path_to_add, add_expanded_string=True, add_front=False):
-    """
+    r"""
     시스템 PATH 환경 변수에 경로를 영구적으로 추가합니다.
     path_to_add: 추가할 경로 문자열. 예: "C:\MyDir" 또는 "%MY_VAR%\bin"
     add_expanded_string: True이면 %VAR% 형태를 REG_EXPAND_SZ로 추가, False이면 REG_SZ.
@@ -490,7 +490,7 @@ def configure_powershell_profile_utf8():
         # $PROFILE 경로 가져오기
         # 'powershell -Command "$PROFILE"' 실행
         result = subprocess.run(
-            ["powershell", "-NoProfile", "-Command", "$PROFILE"],
+            ["pwsh", "-NoProfile", "-Command", "$PROFILE"],
             capture_output=True,
             text=True,
             check=True,
@@ -543,7 +543,7 @@ def configure_powershell_profile_utf8():
 
 # --- MSYS2 Bash 스크립트 실행 ---
 def run_msys2_bash_script(msys2_root, script_path_relative_to_repo, repo_root_dir):
-    """
+    r"""
     MSYS2 bash를 사용하여 지정된 .sh 스크립트를 실행합니다.
     msys2_root: MSYS2 설치 경로 (예: C:\msys64)
     script_path_relative_to_repo: 저장소 루트 기준 .sh 파일 경로 (예: bash/setup-pacman.sh)
