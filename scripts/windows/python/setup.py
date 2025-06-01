@@ -4,15 +4,26 @@ import os
 import sys
 import time
 import getpass  # 사용자 이름 가져오기 (os.getlogin()은 특정 환경에서 문제 가능성)
+import subprocess
+import shutil
 
 # 현재 스크립트의 디렉토리 (저장소 루트로 가정하거나, 상위로 설정 가능)
 # 이 스크립트가 저장소 루트에 있다고 가정.
 # 만약 특정 하위 폴더(예: 'scripts')에 있다면, REPO_ROOT_DIR을 적절히 수정.
-REPO_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+current_script_path = os.path.abspath(__file__)
+current_script_dir = os.path.dirname(current_script_path)
+REPO_ROOT_DIR = os.path.dirname(current_script_dir)
 POWERSHELL_SCRIPTS_DIR = os.path.join(
     REPO_ROOT_DIR, "powershell"
 )  # Bash 스크립트 실행 시 CWD 기준
 BASH_SCRIPTS_DIR = os.path.join(REPO_ROOT_DIR, "bash")  # 실제 .sh 파일들이 있는 곳
+
+print(BASH_SCRIPTS_DIR)
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
 
 # setup_utils.py 에서 함수 임포트
 # setup_utils.py가 같은 디렉토리에 있거나, sys.path에 추가되어야 함.
@@ -20,7 +31,7 @@ try:
     from setup_utils import (
         is_admin,
         run_as_admin_if_needed,
-        run_command,
+        run_command_direct_output,
         set_system_environment_variable,
         add_to_system_path,
         download_msys2_installer,
@@ -31,10 +42,13 @@ try:
         setup_python_venv_and_packages,
         update_current_session_path_from_registry,
     )
-except ImportError:
+except ImportError as e:
     print(
         "오류: setup_utils.py를 찾을 수 없습니다. 스크립트와 같은 디렉토리에 있는지 확인하세요."
     )
+    print(f"ImportError: {e}")
+    print(f"sys.path: {sys.path}")  # 디버깅을 위해 sys.path 출력
+
     sys.exit(1)
 
 
@@ -90,21 +104,20 @@ def main():
     programs_to_install = {
         "PowerShell (최신)": "Microsoft.PowerShell",
         "VSCode": "Microsoft.VisualStudioCode",
-        f"Python ({PYTHON_WINGET_ID.split('.')[-1]})": PYTHON_WINGET_ID,
     }
 
     all_programs_installed_ok = True
     for name, prog_id in programs_to_install.items():
         print(f"--- {name} 설치 시도 ---")
-        success, _ = run_command(
+        success = run_command_direct_output(
             ["winget", "install"] + winget_common_args + ["--id", prog_id],
             success_message=f"{name} 설치/업데이트 성공 또는 이미 최신.",
             error_message=f"{name} 설치/업데이트 실패.",
         )
-        if not success:
-            all_programs_installed_ok = False
-            if prog_id == PYTHON_WINGET_ID:  # Python 설치 실패는 중요
-                print(f"경고: 필수 구성 요소인 {name} 설치에 실패했습니다.")
+        # if not success:
+        #     all_programs_installed_ok = False
+        #     if prog_id == PYTHON_WINGET_ID:  # Python 설치 실패는 중요
+        #         print(f"경고: 필수 구성 요소인 {name} 설치에 실패했습니다.")
         print("-" * 20 + "\n")
 
     if not all_programs_installed_ok:
@@ -194,10 +207,8 @@ def main():
     # 파워셸처럼 MSYS2_PATH를 String으로 정의하고 시스템 Path에 %MSYS2_PATH% 추가
     # 이 MSYS2_PATH는 Python venv 생성 후 완전한 의미를 가짐.
     # 사용자 이름 가져오기
-    current_username = getpass.getuser()
-    msys2_venv_scripts_path = os.path.join(
-        MSYS2_ROOT_DIR, "home", current_username, "python", "msys2-venv", "Scripts"
-    )
+    # current_username = getpass.getuser()
+    msys2_venv_scripts_path = os.path.join("C:\\", "python", "msys2-venv", "Scripts")
 
     # MSYS2_PATH 정의 (String 타입으로 설정할 것이므로, %VAR% 형태는 없음)
     msys2_path_value = f"{msys2_venv_scripts_path};{os.path.join(MSYS2_ROOT_DIR, 'ucrt64', 'bin')};{os.path.join(MSYS2_ROOT_DIR, 'usr', 'bin')}"
@@ -208,7 +219,7 @@ def main():
 
     # 시스템 Path에 "%MSYS2_PATH%" 문자열 추가
     # add_to_system_path는 내부적으로 REG_EXPAND_SZ로 Path를 설정하므로, "%MSYS2_PATH%"가 올바르게 확장됨.
-    add_to_system_path("%MSYS2_PATH%")
+    add_to_system_path("%MSYS2_PATH%", add_front=True)
     print_section_footer()
 
     # (중요) 환경 변수 변경 후 PATH 갱신
@@ -218,10 +229,10 @@ def main():
     print_section_header("MSYS2 초기 설정 (Bash 스크립트)")
     if os.path.isdir(MSYS2_ROOT_DIR):  # MSYS2가 설치되었거나 이미 존재한다고 가정
         bash_scripts_to_run = [
-            "bash/setup-pacman.sh",
-            "bash/update-packages.sh",  # 1차 업데이트
-            "bash/update-packages.sh",  # 2차 업데이트 (MSYS2 권장)
-            "bash/install-deps.sh",
+            "setup-pacman.sh",
+            "update-packages.sh",  # 1차 업데이트
+            "update-packages.sh",  # 2차 업데이트 (MSYS2 권장)
+            "install-deps.sh",
         ]
         for script_rel_path in bash_scripts_to_run:
             # run_msys2_bash_script의 두 번째 인자는 repo 루트 기준 .sh 파일 경로
@@ -255,9 +266,9 @@ def main():
                 )
                 continue
 
-            print(f"--- {os.path.basename(script_rel_path)} 실행 ---")
+            print(f"--- {os.path.basename(full_script_path_in_bash_dir)} 실행 ---")
             run_msys2_bash_script(
-                MSYS2_ROOT_DIR, script_rel_path, REPO_ROOT_DIR
+                MSYS2_ROOT_DIR, "bash/" + script_rel_path, REPO_ROOT_DIR
             )  # REPO_ROOT_DIR 전달
             print("-" * 20 + "\n")
     else:
@@ -265,30 +276,37 @@ def main():
     print_section_footer()
 
     # 6. Python 가상 환경 설정 및 패키지 설치 (setup-python.ps1의 기능)
-    print_section_header("Python 가상 환경 및 패키지 설치")
-    if os.path.isdir(MSYS2_ROOT_DIR):  # MSYS2 설치 확인
-        # winget으로 설치한 Python 경로 사용
-        # PYTHON_EXECUTABLE_PATH가 실제 설치된 경로를 가리키는지 확인 필요.
-        # 또는 PATH에서 'python' 또는 'python3.13'을 사용.
-        # 여기서는 PYTHON_EXECUTABLE_PATH 변수를 그대로 사용.
-        if not os.path.exists(PYTHON_EXECUTABLE_PATH):
-            print(
-                f"경고: Python 실행 파일 '{PYTHON_EXECUTABLE_PATH}'를 찾을 수 없습니다."
-            )
-            print(
-                "winget으로 Python 설치가 올바르게 되었는지, 또는 경로가 정확한지 확인하세요."
-            )
-            print("Python 가상 환경 설정을 건너뜁니다.")
-        else:
-            setup_python_venv_and_packages(
-                MSYS2_ROOT_DIR,
-                current_username,  # 사용자 이름
-                PYTHON_EXECUTABLE_PATH,
-                PYTHON_VENV_PACKAGES,
-            )
-    else:
-        print("MSYS2가 설치되지 않아 Python 가상 환경 설정을 건너뜁니다.")
-    print_section_footer()
+    # print_section_header("Python 가상 환경 및 패키지 설치")
+    # if os.path.isdir(MSYS2_ROOT_DIR):  # MSYS2 설치 확인
+    #     # winget으로 설치한 Python 경로 사용
+    #     # PYTHON_EXECUTABLE_PATH가 실제 설치된 경로를 가리키는지 확인 필요.
+    #     # 또는 PATH에서 'python' 또는 'python3.13'을 사용.
+    #     # 여기서는 PYTHON_EXECUTABLE_PATH 변수를 그대로 사용.
+    #     if not os.path.exists(PYTHON_EXECUTABLE_PATH):
+    #         print(
+    #             f"경고: Python 실행 파일 '{PYTHON_EXECUTABLE_PATH}'를 찾을 수 없습니다."
+    #         )
+    #         print(
+    #             "winget으로 Python 설치가 올바르게 되었는지, 또는 경로가 정확한지 확인하세요."
+    #         )
+    #         print("Python 가상 환경 설정을 건너뜁니다.")
+    #     else:
+    #         setup_python_venv_and_packages(
+    #             MSYS2_ROOT_DIR,
+    #             current_username,  # 사용자 이름
+    #             PYTHON_EXECUTABLE_PATH,
+    #             PYTHON_VENV_PACKAGES,
+    #         )
+    # else:
+    #     print("MSYS2가 설치되지 않아 Python 가상 환경 설정을 건너뜁니다.")
+    # print_section_footer()
+
+    if os.path.isdir(r"C:\python\msys2-venv\Scripts"):
+        run_command_direct_output(  # 여기를 수정
+            [r"C:\python\msys2-venv\Scripts\pip", "install"] + PYTHON_VENV_PACKAGES,
+            success_message="패키지 설치 성공.",
+            error_message="패키지 설치 실패.",
+        )
 
     # 7. VSCode 확장 설치 (setup.ps1의 기능)
     print_section_header("VSCode 확장 설치")
@@ -296,25 +314,27 @@ def main():
     # PATH 갱신이 필요할 수 있음. update_current_session_path_from_registry() 호출됨.
 
     # code 명령어 존재 확인
-    code_exe_path = None
-    try:
-        result = subprocess.run(
-            ["where", "code"],
-            capture_output=True,
-            text=True,
-            check=False,
-            encoding="utf-8",
-        )
-        if result.returncode == 0 and result.stdout.strip():
-            code_exe_path = result.stdout.strip().splitlines()[0]
-    except Exception:
-        pass
+    # code_exe_path = None
+    # try:
+    #     result = subprocess.run(
+    #         ["where", "code"],
+    #         capture_output=True,
+    #         text=True,
+    #         check=False,
+    #         encoding="utf-8",
+    #     )
+    #     if result.returncode == 0 and result.stdout.strip():
+    #         code_exe_path = result.stdout.strip().splitlines()[0]
+    # except Exception:
+    #     pass
+
+    code_exe_path = shutil.which("code")
 
     if code_exe_path:
         print(f"VSCode 실행 파일 확인: {code_exe_path}")
         for extension_id in VSCODE_EXTENSIONS:
             print(f"--- {extension_id} 설치 시도 ---")
-            run_command(
+            run_command_direct_output(
                 [
                     code_exe_path,
                     "--install-extension",
@@ -336,7 +356,7 @@ def main():
     print("모든 개발 환경 설정 스크립트(Python)가 완료되었습니다.")
     print("시스템 전체에 변경 사항을 적용하려면 컴퓨터를 재시작하는 것이 좋습니다.")
     print("=" * 50)
-    input("Enter 키를 눌러 종료합니다...")
+    # input("Enter 키를 눌러 종료합니다...")
 
 
 def print_section_header(title):

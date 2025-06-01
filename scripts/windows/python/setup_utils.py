@@ -46,6 +46,53 @@ def run_as_admin_if_needed(script_path=None, arguments=""):
         print("스크립트가 관리자 권한으로 실행 중입니다.")
 
 
+def run_command_direct_output(
+    command_list, success_message="", error_message="", shell=False, cwd=None, env=None
+):
+    """
+    주어진 명령을 실행하고, 자식 프로세스가 터미널에 직접 출력하도록 합니다.
+    C++ system()과 유사하게 동작합니다.
+    """
+    print(
+        f"실행 시작: {' '.join(command_list) if isinstance(command_list, list) else command_list}"
+    )
+
+    try:
+        # stdout, stderr를 None (기본값)으로 두면 부모의 스트림을 상속받음
+        process = subprocess.run(
+            command_list,
+            shell=shell,
+            cwd=cwd,
+            env=env,
+            check=False,  # 반환 코드 직접 확인
+            # stdin=None, stdout=None, stderr=None (이것이 기본값)
+        )
+
+        if process.returncode == 0:
+            if success_message:
+                print(success_message)
+            print(f"'{command_list[0]}' 실행 완료 (종료 코드: 0)\n")
+            return True
+        # else:
+        #     # 오류 메시지는 여기서 출력하거나, 호출부에서 처리
+        #     err_msg_to_print = (
+        #         error_message
+        #         if error_message
+        #         else f"'{command_list[0]}' 실행 중 오류 발생"
+        #     )
+        #     print(f"{err_msg_to_print} (종료 코드: {process.returncode})\n")
+        #     return False
+
+    except FileNotFoundError:
+        print(
+            f"오류: 명령 '{command_list[0] if isinstance(command_list, list) else command_list.split()[0]}'을(를) 찾을 수 없습니다. PATH를 확인하세요.\n"
+        )
+        return False
+    except Exception as e:
+        print(f"명령 실행 중 예외 발생: {e}\n")
+        return False
+
+
 def run_command(
     command_list,
     success_message="",
@@ -53,37 +100,73 @@ def run_command(
     shell=False,
     cwd=None,
     env=None,
-    capture_output=False,
-):
-    """주어진 명령을 실행하고 결과를 처리합니다."""
+    capture_output_for_result=False,
+):  # capture_output -> capture_output_for_result
+    """
+    주어진 명령을 실행하고 출력을 실시간으로 스트리밍합니다.
+    capture_output_for_result: True이면 stdout, stderr를 캡처하여 반환값으로 사용.
+                               False이면 실시간 출력만 하고 반환값은 빈 문자열.
+    """
     print(
         f"실행 중: {' '.join(command_list) if isinstance(command_list, list) else command_list}"
     )
+
+    # stdout/stderr를 저장할 변수 (capture_output_for_result가 True일 때 사용)
+    full_stdout = []
+    full_stderr = []
+
     try:
-        process = subprocess.run(
+        # Popen으로 프로세스 시작
+        process = subprocess.Popen(
             command_list,
-            shell=shell,
-            capture_output=capture_output
-            or bool(success_message or error_message),  # 메시지 있으면 출력 캡처
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
             encoding="utf-8",
             errors="replace",
+            shell=shell,
             cwd=cwd,
             env=env,
-            check=False,  # 직접 returncode 확인
+            bufsize=1,  # 라인 버퍼링 활성화 (중요)
+            universal_newlines=True,  # text=True와 함께 사용, 라인 엔딩 처리
         )
 
-        if capture_output or process.stdout or process.stderr:
-            if process.stdout:
-                print(f"출력:\n{process.stdout.strip()}")
-            if process.stderr:
-                # winget은 stderr로 진행률 표시하기도 함.
-                print(f"에러 또는 진행률:\n{process.stderr.strip()}")
+        # 실시간으로 stdout, stderr 읽기
+        # stdout 처리
+        if process.stdout:
+            for line in iter(process.stdout.readline, ""):
+                line_stripped = line.strip()
+                print(line_stripped)  # 실시간 출력
+                sys.stdout.flush()  # 즉시 터미널에 보이도록 플러시
+                if capture_output_for_result:
+                    full_stdout.append(line_stripped)
+            process.stdout.close()
+
+        # stderr 처리 (stdout과 별도로 또는 stdout과 인터리빙되게 처리 가능)
+        # 여기서는 stdout 먼저 다 읽고 stderr 읽지만, select 등을 사용하면 동시 처리 가능
+        # 또는 stderr도 stdout과 같은 방식으로 루프를 돌릴 수 있음 (별도 스레드 또는 비동기)
+        # 더 간단하게는, wait() 호출 후 남은 stderr를 읽는 방식도 있음.
+        # winget 같은 경우 stderr로도 정상 진행률을 출력하므로, stdout처럼 처리.
+        if process.stderr:
+            for line in iter(process.stderr.readline, ""):
+                line_stripped = line.strip()
+                # stderr 출력을 구분하고 싶다면 print(f"STDERR: {line_stripped}")
+                print(line_stripped)  # 실시간 출력 (stderr도 일반 출력처럼)
+                sys.stderr.flush()
+                if capture_output_for_result:
+                    full_stderr.append(line_stripped)
+            process.stderr.close()
+
+        process.wait()  # 프로세스 종료 대기
+
+        # 결과 반환 (capture_output_for_result가 True일 때)
+        stdout_result = "\n".join(full_stdout) if capture_output_for_result else ""
+        stderr_result = "\n".join(full_stderr) if capture_output_for_result else ""
 
         if process.returncode == 0:
             if success_message:
                 print(success_message)
-            return True, process.stdout if capture_output else ""
+            return True, stdout_result
         else:
             err_msg_to_print = (
                 error_message
@@ -91,15 +174,18 @@ def run_command(
                 else f"명령 실행 중 오류 발생 (종료 코드: {process.returncode})"
             )
             print(err_msg_to_print)
-            return False, process.stderr if capture_output else ""
+            # 오류 시에는 stderr 내용을 반환하는 것이 유용할 수 있음
+            return False, (
+                stderr_result if stderr_result else stdout_result
+            )  # 오류 시 stderr 우선 반환
 
     except FileNotFoundError:
-        print(
-            f"오류: 명령 '{command_list[0] if isinstance(command_list, list) else command_list.split()[0]}'을(를) 찾을 수 없습니다. PATH를 확인하세요."
-        )
+        msg = f"오류: 명령 '{command_list[0] if isinstance(command_list, list) else command_list.split()[0]}'을(를) 찾을 수 없습니다. PATH를 확인하세요."
+        print(msg)
         return False, "FileNotFoundError"
     except Exception as e:
-        print(f"명령 실행 중 예외 발생: {e}")
+        msg = f"명령 실행 중 예외 발생: {e}"
+        print(msg)
         return False, str(e)
 
 
@@ -209,7 +295,7 @@ def set_system_environment_variable(var_name, var_value, var_type="REG_SZ"):
         return False
 
 
-def add_to_system_path(path_to_add, add_expanded_string=True):
+def add_to_system_path(path_to_add, add_expanded_string=True, add_front=False):
     """
     시스템 PATH 환경 변수에 경로를 영구적으로 추가합니다.
     path_to_add: 추가할 경로 문자열. 예: "C:\MyDir" 또는 "%MY_VAR%\bin"
@@ -257,7 +343,11 @@ def add_to_system_path(path_to_add, add_expanded_string=True):
                     # 파워셸 스크립트는 맨 앞에 추가했었음. 동일하게 하려면:
                     # paths.insert(0, path_to_add.strip())
                     # 여기서는 맨 뒤에 추가 (일반적)
-                    paths.append(path_to_add.strip())
+                    if add_front:
+                        paths.insert(0, path_to_add.strip())
+                    else:
+                        paths.append(path_to_add.strip())
+
                     new_path_value = ";".join(paths)
 
                     # Path는 항상 REG_EXPAND_SZ로 설정하는 것이 안전
@@ -370,7 +460,7 @@ def install_msys2(installer_path, install_root):
         install_root,
     ]
 
-    success, _ = run_command(
+    success = run_command_direct_output(
         command,
         success_message="MSYS2 설치가 완료된 것 같습니다.",
         error_message="MSYS2 설치 중 오류 발생.",
@@ -506,16 +596,16 @@ def run_msys2_bash_script(msys2_root, script_path_relative_to_repo, repo_root_di
     # Bash 스크립트들은 이 `powershell` 디렉토리의 부모(`../`) 아래 `bash` 폴더에 있음.
     # 따라서, bash의 `cd` 명령의 기준이 되는 디렉토리를 `powershell` 디렉토리로 맞춰주면
     # 기존 bash 스크립트의 `../bash/script.sh` 호출이 유효함.
-    powershell_dir_in_repo = os.path.join(
-        repo_root_dir, "powershell"
-    )  # 또는 이 함수 호출 시 명시
+    # powershell_dir_in_repo = os.path.join(
+    #     repo_root_dir, "powershell"
+    # )  # 또는 이 함수 호출 시 명시
 
-    # bash -lc "명령어" 형태
-    # bash 스크립트의 상대 경로가 `../bash/script.sh` 이므로,
-    # bash의 현재 작업 디렉토리(cd)는 `powershell` 디렉토리가 되어야 함.
-    msys_style_powershell_dir = powershell_dir_in_repo.replace(os.sep, "/").replace(
-        "C:", "/c", 1
-    )  # 단순 변환
+    # # bash -lc "명령어" 형태
+    # # bash 스크립트의 상대 경로가 `../bash/script.sh` 이므로,
+    # # bash의 현재 작업 디렉토리(cd)는 `powershell` 디렉토리가 되어야 함.
+    # msys_style_powershell_dir = powershell_dir_in_repo.replace(os.sep, "/").replace(
+    #     "C:", "/c", 1
+    # )  # 단순 변환
 
     # bash 스크립트 경로 (예: ../bash/setup-pacman.sh)
     # script_path_relative_to_repo 가 "bash/setup-pacman.sh" 이므로,
@@ -530,16 +620,14 @@ def run_msys2_bash_script(msys2_root, script_path_relative_to_repo, repo_root_di
     # 여기서는 기존 bash 스크립트 구조를 최대한 유지하기 위해
     # 파워셸과 유사한 환경을 만들어줌.
 
-    bash_command_string = f"cd '{msys_style_powershell_dir}'; {script_path_relative_to_repo.replace('bash/', '../bash/')}"
+    bash_command_string = f"cd '{repo_root_dir}'; {script_path_relative_to_repo}"
     # 예: script_path_relative_to_repo = "bash/setup-pacman.sh"
     # -> bash_command_string = "cd '/c/repo/powershell'; ../bash/setup-pacman.sh"
 
     full_bash_command = [bash_exe, "-lc", bash_command_string]
 
-    print(f"MSYS2 Bash 스크립트 실행: {' '.join(full_bash_command)}")
-    # Bash 스크립트는 진행 상황을 터미널에 직접 출력하므로, capture_output=False가 나을 수 있음
-    # 또는 run_command 내부에서 실시간 스트리밍 지원하도록 수정
-    success, _ = run_command(
+    print(f"MSYS2 Bash 스크립트 실행 시작: {' '.join(full_bash_command)}")
+    success = run_command_direct_output(  # 여기를 수정
         full_bash_command,
         success_message=f"Bash 스크립트 '{script_path_relative_to_repo}' 실행 완료된 것 같습니다.",
         error_message=f"Bash 스크립트 '{script_path_relative_to_repo}' 실행 중 오류.",
