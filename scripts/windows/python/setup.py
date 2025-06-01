@@ -19,8 +19,6 @@ POWERSHELL_SCRIPTS_DIR = os.path.join(
 )  # Bash 스크립트 실행 시 CWD 기준
 BASH_SCRIPTS_DIR = os.path.join(REPO_ROOT_DIR, "bash")  # 실제 .sh 파일들이 있는 곳
 
-print(BASH_SCRIPTS_DIR)
-
 script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
