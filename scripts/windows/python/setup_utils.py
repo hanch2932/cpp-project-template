@@ -226,7 +226,7 @@ def get_env_variable(name, scope="machine"):
         "user": winreg.HKEY_CURRENT_USER,
     }
     reg_path_map = {
-        "machine": r"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment",
+        "machine": r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment",
         "user": r"Environment",
     }
 
@@ -311,7 +311,7 @@ def add_to_system_path(path_to_add, add_expanded_string=True, add_front=False):
         print("오류: 시스템 PATH를 수정하려면 관리자 권한이 필요합니다.")
         return False
 
-    key_path = r"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
+    key_path = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
     try:
         with winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE) as hkey_root:
             with winreg.OpenKey(
