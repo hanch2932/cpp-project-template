@@ -23,16 +23,21 @@ if not %errorlevel% == 0 (
 )
 
 echo.
-echo 이 작업은 최초 실행 시 10분 정도 소요됩니다. 잠시만 기다려주세요...
-"C:\Windows\System32\timeout" /t 3 /nobreak > nul
+echo 이 작업은 최초 실행 시 10분 정도 소요됩니다.
+echo 인터넷 상태 및 컴퓨터 환경에 따라 소요 시간이 달라질 수 있습니다.
+echo 작업이 완료될 때까지 기다려 주세요...
+"C:\Windows\System32\timeout" /t 5 /nobreak > nul
 echo.
 
 echo 개발에 필요한 윈도우 프로그램 설치...
-echo (1/2) PowerShell 설치 중...
-winget install --accept-package-agreements --accept-source-agreements -e --id Microsoft.PowerShell
-echo.
-echo (2/2) VSCode 설치 중...
-winget install --accept-package-agreements --accept-source-agreements -e --id Microsoft.VisualStudioCode
+@REM echo (1/3) PowerShell 설치 중...
+@REM winget install --accept-package-agreements --accept-source-agreements -e --id Microsoft.PowerShell
+@REM echo.
+@REM echo (2/3) VSCode 설치 중...
+@REM winget install --accept-package-agreements --accept-source-agreements -e --id Microsoft.VisualStudioCode
+@REM echo.
+echo Python 설치 중...
+winget install --accept-package-agreements --accept-source-agreements -e --id Python.Python.3.13
 echo 프로그램 설치 완료
 echo.
 
@@ -61,7 +66,15 @@ echo.
 
 SET "CURRENT_DIR=%~dp0"
 
-pwsh -NoProfile -ExecutionPolicy Bypass -File "%CURRENT_DIR%\powershell\setup.ps1"
+@REM cd %CURRENT_DIR%
+@REM dir
+
+"C:\Users\%USERNAME%\AppData\Local\Programs\Python\Python313\python" -m venv "C:\python\msys2-venv"
+"C:\python\msys2-venv\Scripts\python" -m pip install --upgrade pip
+"C:\python\msys2-venv\Scripts\pip" install requests tqdm
+"C:\python\msys2-venv\Scripts\python" "%CURRENT_DIR%\python\setup.py"
+
+@REM pwsh -NoProfile -ExecutionPolicy Bypass -File "%CURRENT_DIR%\powershell\setup.ps1"
 
 endlocal
 pause

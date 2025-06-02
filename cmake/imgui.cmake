@@ -8,7 +8,7 @@ function(include_imgui)
   FetchContent_Declare(
     ${TARGET_NAME}
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG v1.91.8-docking
+    GIT_TAG v1.91.9b-docking
     GIT_SHALLOW TRUE
   )
 
