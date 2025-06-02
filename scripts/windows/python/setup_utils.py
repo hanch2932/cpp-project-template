@@ -13,6 +13,7 @@ from tqdm import tqdm  # 진행률 표시
 HWND_BROADCAST = 0xFFFF
 WM_SETTINGCHANGE = 0x001A
 SMTO_ABORTIFHUNG = 0x0002
+SMTO_NOTIMEOUTIFNOTHUNG = 0x0008
 
 
 # --- 기본 유틸리티 ---
