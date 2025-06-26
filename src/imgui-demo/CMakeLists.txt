@@ -13,3 +13,9 @@ target_link_libraries(
   PRIVATE
   third-party
 )
+
+target_compile_definitions(
+  ${TARGET_NAME}
+  PRIVATE
+    IMGUI_DEMO_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+)
