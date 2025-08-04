@@ -11,22 +11,17 @@ ROOT_DIR="$SCRIPT_DIR/.."
 
 # 소스 파일/디렉토리 및 도메인 설정
 declare -A DOMAIN_FILES=(
-    ["app"]="
-        $ROOT_DIR/src/encoder/gui/app-main.cpp
-        $ROOT_DIR/src/encoder/gui/j-code-prop.cpp
-        $ROOT_DIR/src/encoder/gui/j2-code-prop.cpp
-        $ROOT_DIR/src/encoder/gui/preview-dock.cpp
-        $ROOT_DIR/src/encoder/gui/license-window.cpp
-        $ROOT_DIR/src/encoder/gui/info-window.cpp
+    ["domain1"]="
+        $ROOT_DIR/path/to/source
     "
-    ["login"]="
-        $ROOT_DIR/src/encoder/gui/login.cpp
+    ["domain2"]="
+        $ROOT_DIR/path/to/source
     "
-    ["admin"]="
-        $ROOT_DIR/src/encoder/gui/admin.cpp
+    ["domain3"]="
+        $ROOT_DIR/path/to/source
     "
-    ["settings"]="
-        $ROOT_DIR/src/encoder/gui/settings-window.cpp
+    ["domain4"]="
+        $ROOT_DIR/path/to/source
     "
 )
 
