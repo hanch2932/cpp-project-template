@@ -5,7 +5,7 @@ set(DEST_LOCATION "${CMAKE_SOURCE_DIR}/out/build/compile_commands.json")
 # compile_commands.json 복사 타깃 생성
 add_custom_target(
   copy_compile_commands ALL
-  COMMENT "Copying compile_commands.json after build"
+  COMMENT "Copying compile_commands.json before build"
 )
 
 # compile_commands.json 복사 타깃이 실행될 때 파일 복사를 수행하도록 설정
