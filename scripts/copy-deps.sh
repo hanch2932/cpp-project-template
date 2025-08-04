@@ -33,16 +33,16 @@ for LIB in $LIBS; do
   cp -v "$LIB" "$TARGET_DIR"
 done
 
-if [ "$OS" == "Windows" ]; then
-  EXTRA_PATH="/ucrt64/share/qt6/plugins/platforms"
-  EXTRA_LIBS=("qdirect2d.dll" "qminimal.dll" "qoffscreen.dll" "qwindows.dll")
-  EXTRA_DEST_PATH="$TARGET_DIR/platforms"
+# if [ "$OS" == "Windows" ]; then
+#   EXTRA_PATH="/ucrt64/share/qt6/plugins/platforms"
+#   EXTRA_LIBS=("qdirect2d.dll" "qminimal.dll" "qoffscreen.dll" "qwindows.dll")
+#   EXTRA_DEST_PATH="$TARGET_DIR/platforms"
 
-  mkdir -p "$EXTRA_DEST_PATH"
+#   mkdir -p "$EXTRA_DEST_PATH"
 
-  for EXTRA_LIB in ${EXTRA_LIBS[@]}; do
-    cp -v "$EXTRA_PATH/$EXTRA_LIB" "$EXTRA_DEST_PATH"
-  done
-fi
+#   for EXTRA_LIB in ${EXTRA_LIBS[@]}; do
+#     cp -v "$EXTRA_PATH/$EXTRA_LIB" "$EXTRA_DEST_PATH"
+#   done
+# fi
 
 echo "All libraries copied to $TARGET_DIR"
